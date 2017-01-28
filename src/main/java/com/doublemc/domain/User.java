@@ -1,7 +1,12 @@
 package com.doublemc.domain;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Created by michal on 28.01.17.
@@ -9,17 +14,12 @@ import java.util.Set;
 
 @Entity
 @Table (name = "USERS")
-public class User implements Comparable<User> {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "USER_ID")
-    private Integer id;
+public class User extends BaseEntity {
 
     @Column(name = "USERNAME")
     private String username;
 
-    // TODO: 28.01.17 Find a way to store hashed and salted pw in DB
+    // TODO: 28.01.17 Find a way to store hashed and salted pws in DB
     @Column(name = "PASSWORD")
     private String password;
 
@@ -30,6 +30,7 @@ public class User implements Comparable<User> {
     @JoinColumn(name = "USER_ID")
     private Set<ToDoItem> toDoItems;
 
+
     public User() {}
 
     public User(String username, String password, String email) {
@@ -37,6 +38,7 @@ public class User implements Comparable<User> {
         this.password = password;
         this.email = email;
     }
+
 
     public String getUsername() {
         return username;
@@ -62,14 +64,4 @@ public class User implements Comparable<User> {
         this.email = email;
     }
 
-
-    @Override
-    public int compareTo(User user) {
-        return this.getUsername().compareTo(user.getUsername());
-    }
-
-    @Override
-    public int hashCode() {
-        return ((username == null) ? 0 : username.hashCode());
-    }
 }

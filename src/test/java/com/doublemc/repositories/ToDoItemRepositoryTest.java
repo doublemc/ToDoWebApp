@@ -1,6 +1,7 @@
 package com.doublemc.repositories;
 
 
+import com.doublemc.domain.BaseEntity;
 import com.doublemc.domain.ToDoItem;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +35,7 @@ public class ToDoItemRepositoryTest {
 
     @Before
     public void setUp() {
+
         toDoItem = new ToDoItem("First", new Date(20/05/1994));
     }
 
@@ -58,10 +60,10 @@ public class ToDoItemRepositoryTest {
 
     @Test
     public void removeByTitle() {
-        // create seconds toDoItem with the same name as first one
+        // create second toDoItem with the same name as first one
         ToDoItem toDoItem2 = new ToDoItem(toDoItem.getTitle(), new Date(20/05/2015));
 
-        // create a third item as a control group
+        // create third item as a control group
         ToDoItem toDoItem3 = new ToDoItem("Third", new Date(20/05/2013));
 
         repository.save(Arrays.asList(toDoItem, toDoItem2, toDoItem3));

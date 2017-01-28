@@ -8,13 +8,9 @@ import java.util.Date;
  */
 
 @Entity
-@Table (name = "TO_DO_ITEMS")
-public class ToDoItem implements Comparable<ToDoItem> {
+@Table (name = "TO_DO_ITEM")
+public class ToDoItem extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TO_DO_ID")
-    private Long id;
 
     @Column(name = "TITLE", nullable = false)
     private String title;
@@ -26,10 +22,8 @@ public class ToDoItem implements Comparable<ToDoItem> {
     private Date dueDate;
 
 
-
     // JPA demands empty contructor
-    public ToDoItem() {
-    }
+    public ToDoItem() {}
 
     public ToDoItem(String title, Date dueDate) {
         this.title = title;
@@ -37,13 +31,6 @@ public class ToDoItem implements Comparable<ToDoItem> {
         this.completed = false; // always freshly created todos aren't completed
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getTitle() {
         return title;
@@ -69,13 +56,4 @@ public class ToDoItem implements Comparable<ToDoItem> {
         this.dueDate = dueDate;
     }
 
-    @Override
-    public int compareTo(ToDoItem toDoItem) {
-        return this.getId().compareTo(toDoItem.getId());
-    }
-
-    @Override
-    public String toString() {
-        return id + ": " + title + (isCompleted() ? " is completed" : " is not completed");
-    }
 }
