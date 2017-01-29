@@ -1,8 +1,7 @@
 package com.doublemc.repositories;
 
 
-import com.doublemc.domain.BaseEntity;
-import com.doublemc.domain.ToDoItem;
+import com.doublemc.model.ToDoItem;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

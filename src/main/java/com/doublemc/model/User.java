@@ -1,12 +1,7 @@
-package com.doublemc.domain;
-
-import org.springframework.beans.factory.annotation.Autowired;
+package com.doublemc.model;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Created by michal on 28.01.17.
@@ -30,7 +25,7 @@ public class User extends BaseEntity {
     @JoinColumn(name = "USER_ID")
     private Set<ToDoItem> toDoItems;
 
-
+    // JPA demands empty contructor
     public User() {}
 
     public User(String username, String password, String email) {

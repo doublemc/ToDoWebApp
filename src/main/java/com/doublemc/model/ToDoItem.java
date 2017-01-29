@@ -1,4 +1,4 @@
-package com.doublemc.domain;
+package com.doublemc.model;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -28,7 +28,7 @@ public class ToDoItem extends BaseEntity {
     public ToDoItem(String title, Date dueDate) {
         this.title = title;
         this.dueDate = dueDate;
-        this.completed = false; // always freshly created todos aren't completed
+        this.completed = false; // always new todos aren't completed
     }
 
 

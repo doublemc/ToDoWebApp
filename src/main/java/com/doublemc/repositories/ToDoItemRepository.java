@@ -1,8 +1,7 @@
 package com.doublemc.repositories;
 
-import com.doublemc.domain.ToDoItem;
+import com.doublemc.model.ToDoItem;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
