@@ -1,4 +1,4 @@
-package com.doublemc.model;
+package com.doublemc.domain;
 
 import javax.persistence.*;
 import java.io.Serializable;

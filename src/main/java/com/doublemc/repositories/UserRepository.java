@@ -1,6 +1,6 @@
 package com.doublemc.repositories;
 
-import com.doublemc.model.User;
+import com.doublemc.domain.User;
 import org.springframework.data.repository.CrudRepository;
 
 /**

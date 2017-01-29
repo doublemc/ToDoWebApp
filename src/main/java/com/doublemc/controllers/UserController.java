@@ -1,7 +1,7 @@
 package com.doublemc.controllers;
 
-import com.doublemc.model.User;
-import com.doublemc.repositories.UserRepository;
+import com.doublemc.domain.User;
+import com.doublemc.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     @Autowired
-    UserRepository userRepository;
+    UserService userService;
 
-    // exposes new User to the Thymeleaf (register form)
+    // exposes new User to Thymeleaf template (register form)
     @GetMapping("/register")
     public String newUserForm(Model model) {
         model.addAttribute("user", new User());
@@ -24,10 +24,10 @@ public class UserController {
     }
 
 
-    // this function captures completed form and creates new User with them + adds him to the DB
+    // this function captures completed form and creates new User + adds it to DB
     @PostMapping("/register")
-    public String registerNewUser(@ModelAttribute User user) {
-        userRepository.save(user);
+    public String saveNewUser(@ModelAttribute User user) {
+        userService.saveUser(user);
         return "success";
     }
 

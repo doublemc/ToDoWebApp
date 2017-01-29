@@ -1,6 +1,6 @@
 package com.doublemc.repositories;
 
-import com.doublemc.model.ToDoItem;
+import com.doublemc.domain.ToDoItem;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Date;
@@ -11,7 +11,4 @@ import java.util.List;
  */
 public interface ToDoItemRepository extends CrudRepository<ToDoItem, Long> {
 
-    List<ToDoItem> findByDueDate(Date date);
-
-    Long removeByTitle(String string);
 }

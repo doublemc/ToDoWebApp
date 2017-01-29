@@ -1,7 +1,7 @@
 package com.doublemc.controllers;
 
-import com.doublemc.model.ToDoItem;
-import com.doublemc.repositories.ToDoItemRepository;
+import com.doublemc.domain.ToDoItem;
+import com.doublemc.services.ToDoItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,27 +13,35 @@ import org.springframework.web.bind.annotation.*;
 public class ToDoItemController {
 
     @Autowired
-    ToDoItemRepository toDoItemRepository;
+    ToDoItemService toDoItemService;
 
-    // is responsible for giving all the ToDos to Thymeleaf so it has access to them
-    @GetMapping("/yourtodos")
+    @GetMapping("/todos/showall")
     public String viewToDos(Model model) {
-        model.addAttribute("allToDoItems", toDoItemRepository.findAll());
+        model.addAttribute("allToDoItems", toDoItemService.listAllToDoItems());
         return "viewtodos";
     }
 
-    @PostMapping("/addtodo")
-    public String addToDo(@ModelAttribute ToDoItem toDoItem) {
-        toDoItemRepository.save(toDoItem);
-        return "todoadded";
+    // exposes new ToDoItem to Thymeleaf template (new item form)
+    @GetMapping("/todos/addnew")
+    public String newToDo(Model model) {
+        model.addAttribute("todoitem", new ToDoItem());
+        return "todoform";
     }
 
-    @DeleteMapping(value = "items/{id}")
-    public String delete(@PathVariable("id") Long itemId, Model model) {
-        ToDoItem toDoItem = toDoItemRepository.findOne(itemId);
-        toDoItemRepository.delete(toDoItem.getId());
+    // this function captures completed form and creates new ToDoItem + adds it to DB
+    @PostMapping("/todos/addnew")
+    public String saveToDo(@ModelAttribute ToDoItem toDoItem) {
+        toDoItemService.addNewToDo(toDoItem);
+        return "redirect:/todos/showall";
+    }
 
-        return "itemdeleted";
+    @DeleteMapping(value = "/todos/delete/{id}")
+    public String deleteToDo(@PathVariable("id") Long itemId) {
+        if (toDoItemService.getToDoItemById(itemId) != null) {
+            toDoItemService.deleteToDo(itemId);
+            return "success";
+        }
+        return "failed";
     }
 
 }
