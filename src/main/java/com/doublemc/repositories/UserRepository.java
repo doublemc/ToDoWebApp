@@ -8,4 +8,7 @@ import org.springframework.data.repository.CrudRepository;
  */
 
 public interface UserRepository extends CrudRepository<User, Long> {
+
+    // TODO: 29.01.17 Create a query to find all todos for User
+
 }

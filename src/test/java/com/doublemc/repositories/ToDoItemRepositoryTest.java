@@ -11,13 +11,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
 
+import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 
 /**
  * Created by michal on 28.01.17.
@@ -30,47 +30,60 @@ public class ToDoItemRepositoryTest {
     @Autowired
     ToDoItemRepository repository;
 
-    ToDoItem toDoItem;
+    private ToDoItem toDoItem1;
+    private ToDoItem toDoItem2;
 
     @Before
-    public void setUp() {
-
-        toDoItem = new ToDoItem("First", new Date(20/05/1994));
+    public void setUp() throws Exception {
+        toDoItem1 = new ToDoItem("First", LocalDate.of(2015, 6, 25));
+        toDoItem2 = new ToDoItem("Two", LocalDate.of(2017, 11, 27));
     }
 
     @Test
-    public void findSavedToDoItemById() {
-        toDoItem = repository.save(toDoItem);
-
-        assertThat(repository.findOne(toDoItem.getId()), is(toDoItem));
+    public void hasIdAfterSavingToDb() {
+        assertNull(toDoItem1.getId());
+        repository.save(toDoItem1);
+        assertNotNull(toDoItem1.getId());
 
     }
 
-//    @Test
-//    public void findSavedToDoItemByDate() {
-//        toDoItem = repository.save(toDoItem);
-//
-//        List<ToDoItem> toDoItems = repository.findByDueDate(new Date(20/05/1994));
-//
-//        assertThat(toDoItems, is(notNullValue()));
-//
-//        assertThat(toDoItems.contains(toDoItem), is(true));
-//    }
+    @Test
+    public void findToDoItemById () {
+        repository.save(toDoItem1);
+        assertNotNull(repository.findOne(toDoItem1.getId()));
+    }
 
-//    @Test
-//    public void removeByTitle() {
-//        // create second toDoItem with the same name as first one
-//        ToDoItem toDoItem2 = new ToDoItem(toDoItem.getTitle(), new Date(20/05/2015));
-//
-//        // create third item as a control group
-//        ToDoItem toDoItem3 = new ToDoItem("Third", new Date(20/05/2013));
-//
-//        repository.save(Arrays.asList(toDoItem, toDoItem2, toDoItem3));
-//
-//        assertThat(repository.removeByTitle(toDoItem.getTitle()), is(2L));
-//        assertThat(repository.exists(toDoItem3.getId()), is(true));
-//
-//    }
+    @Test
+    public void hasTheSameTitleAfterSavingToDb() {
+        ToDoItem savedToDo =  repository.save(toDoItem1);
+        assertEquals(toDoItem1.getTitle(), savedToDo.getTitle());
+    }
+
+    @Test
+    public void isUpdatingTitleCorrectly() {
+        ToDoItem savedToDo = repository.save(toDoItem1);
+        savedToDo.setTitle("New title");
+        repository.save(savedToDo);
+        ToDoItem changedToDo = repository.findOne(savedToDo.getId());
+        assertEquals(savedToDo.getTitle(), changedToDo.getTitle());
+    }
+
+    @Test
+    public void verifyNumberOfToDosInDb() {
+        repository.save(Arrays.asList(toDoItem1, toDoItem2));
+        assertEquals(2, repository.count());
+    }
+
+    @Test
+    public void verifyDeletedFileFromDb() {
+        repository.save(Arrays.asList(toDoItem1, toDoItem2));
+        repository.delete(toDoItem1.getId());
+        assertEquals(1, repository.count());
+    }
+
+
+
+
 
 
 }

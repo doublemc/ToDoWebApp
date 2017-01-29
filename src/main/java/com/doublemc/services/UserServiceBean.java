@@ -9,14 +9,10 @@ import org.springframework.stereotype.Service;
  * Created by michal on 29.01.17.
  */
 @Service
-public class UserServiceImpl implements UserService {
-
-    private UserRepository userRepository;
+public class UserServiceBean implements UserService {
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    private UserRepository userRepository;
 
     @Override
     public User saveUser(User user) {

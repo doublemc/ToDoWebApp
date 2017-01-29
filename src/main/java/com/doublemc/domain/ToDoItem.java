@@ -1,6 +1,8 @@
 package com.doublemc.domain;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -19,13 +21,13 @@ public class ToDoItem extends BaseEntity {
     private boolean completed;
 
     @Column(name = "DUE_DATE", nullable = false)
-    private Date dueDate;
+    private LocalDate dueDate;
 
 
     // JPA demands empty contructor
     public ToDoItem() {}
 
-    public ToDoItem(String title, Date dueDate) {
+    public ToDoItem(String title, LocalDate dueDate) {
         this.title = title;
         this.dueDate = dueDate;
         this.completed = false; // always new todos aren't completed
@@ -48,11 +50,11 @@ public class ToDoItem extends BaseEntity {
         this.completed = completed;
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

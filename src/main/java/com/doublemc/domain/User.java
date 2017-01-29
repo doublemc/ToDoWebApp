@@ -34,6 +34,13 @@ public class User extends BaseEntity {
         this.email = email;
     }
 
+    public Set<ToDoItem> getToDoItems() {
+        return toDoItems;
+    }
+
+    public void setToDoItems(Set<ToDoItem> toDoItems) {
+        this.toDoItems = toDoItems;
+    }
 
     public String getUsername() {
         return username;

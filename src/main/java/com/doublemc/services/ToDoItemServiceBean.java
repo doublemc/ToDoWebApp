@@ -9,14 +9,10 @@ import org.springframework.stereotype.Service;
  * Created by michal on 29.01.17.
  */
 @Service
-public class ToDoItemServiceImpl implements ToDoItemService {
-
-    private ToDoItemRepository toDoItemRepository;
+public class ToDoItemServiceBean implements ToDoItemService {
 
     @Autowired
-    public ToDoItemServiceImpl(ToDoItemRepository toDoItemRepository) {
-        this.toDoItemRepository = toDoItemRepository;
-    }
+    private ToDoItemRepository toDoItemRepository;
 
     @Override
     public Iterable<ToDoItem> listAllToDoItems() {
