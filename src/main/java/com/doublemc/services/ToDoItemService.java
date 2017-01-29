@@ -17,4 +17,6 @@ public interface ToDoItemService {
     ToDoItem addNewToDo(ToDoItem toDoItem);
 
     void deleteToDo(Long id);
+
+    void updateItems(ToDoItem toDoItem);
 }

@@ -1,6 +1,7 @@
 package com.doublemc.domain;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -21,11 +22,11 @@ public class User extends BaseEntity {
     @Column(name = "EMAIL")
     private String email;
 
-    @OneToMany
-    @JoinColumn(name = "USER_ID")
+    // user can have many ToDoItems
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<ToDoItem> toDoItems;
 
-    // JPA demands empty contructor
+    // JPA demands empty constructor
     public User() {}
 
     public User(String username, String password, String email) {

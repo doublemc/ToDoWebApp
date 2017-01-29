@@ -1,8 +1,10 @@
 package com.doublemc.services;
 
+import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -18,4 +20,6 @@ public class UserServiceBean implements UserService {
     public User saveUser(User user) {
         return userRepository.save(user);
     }
+
+
 }

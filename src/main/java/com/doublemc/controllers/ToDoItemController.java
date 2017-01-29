@@ -3,22 +3,23 @@ package com.doublemc.controllers;
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.services.ToDoItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * Created by michal on 29.01.17.
  */
-@RestController
+@Controller
 public class ToDoItemController {
 
     @Autowired
     ToDoItemService toDoItemService;
 
-    @GetMapping("/todos")
+    @GetMapping("/")
     public String viewToDos(Model model) {
         model.addAttribute("allToDoItems", toDoItemService.listAllToDoItems());
-        return "viewtodos";
+        return "mytodos";
     }
 
     // exposes new ToDoItem to Thymeleaf template (new item form)
@@ -31,7 +32,7 @@ public class ToDoItemController {
     // this function captures completed form and creates new ToDoItem + adds it to DB
     @PostMapping(value = "todoitem")
     public String saveToDo(ToDoItem toDoItem) {
-        toDoItemService.addNewToDo(toDoItem);
+        toDoItemService.updateItems(toDoItem);
         return "redirect:/todos";
     }
 

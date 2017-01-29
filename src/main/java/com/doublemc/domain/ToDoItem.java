@@ -23,6 +23,11 @@ public class ToDoItem extends BaseEntity {
     @Column(name = "DUE_DATE", nullable = false)
     private LocalDate dueDate;
 
+    // a ToDoItem is only associated with one user
+    @ManyToOne(cascade=CascadeType.PERSIST)
+    @JoinColumn(name = "USER_ID")
+    private User user;
+
 
     // JPA demands empty contructor
     public ToDoItem() {}
@@ -30,7 +35,6 @@ public class ToDoItem extends BaseEntity {
     public ToDoItem(String title, LocalDate dueDate) {
         this.title = title;
         this.dueDate = dueDate;
-        this.completed = false; // always new todos aren't completed
     }
 
 
@@ -56,6 +60,15 @@ public class ToDoItem extends BaseEntity {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }
