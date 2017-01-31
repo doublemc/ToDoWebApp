@@ -1,7 +1,6 @@
 package com.doublemc.domain;
 
 import javax.persistence.*;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -67,4 +66,8 @@ public class User extends BaseEntity {
         this.email = email;
     }
 
+    @Override
+    public String toString() {
+        return getId() + ": " + username;
+    }
 }

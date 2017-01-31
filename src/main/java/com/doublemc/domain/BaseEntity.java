@@ -15,6 +15,7 @@ public abstract class BaseEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Transient
     private String uuid = UUID.randomUUID().toString();
 
     public Long getId() {

@@ -11,9 +11,8 @@ import java.util.Date;
  */
 
 @Entity
-@Table (name = "TO_DO_ITEM")
+@Table (name = "TO_DO_ITEMS")
 public class ToDoItem extends BaseEntity {
-
 
     @Column(name = "TITLE", nullable = false)
     private String title;
