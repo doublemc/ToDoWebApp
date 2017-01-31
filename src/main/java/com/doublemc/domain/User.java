@@ -23,7 +23,7 @@ public class User extends BaseEntity {
     private String email;
 
     // user can have many ToDoItems
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
     private Set<ToDoItem> toDoItems;
 
     // JPA demands empty constructor

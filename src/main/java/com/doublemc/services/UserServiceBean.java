@@ -11,14 +11,25 @@ import org.springframework.stereotype.Service;
  * Created by michal on 29.01.17.
  */
 @Service
-public class UserServiceBean implements UserService {
+public class UserServiceBean {
 
-    @Autowired
+
     private UserRepository userRepository;
 
-    @Override
+    @Autowired
+    public UserServiceBean(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public User saveUser(User user) {
         return userRepository.save(user);
+    }
+
+    public boolean userExists(User user) {
+        if (userRepository.findByUsername(user.getUsername()) == null) {
+            return false;
+        }
+        return true;
     }
 
 
