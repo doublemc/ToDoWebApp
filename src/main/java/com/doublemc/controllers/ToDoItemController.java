@@ -6,6 +6,8 @@ import com.doublemc.repositories.UserRepository;
 import com.doublemc.services.ToDoItemServiceBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,33 +31,40 @@ public class ToDoItemController {
         this.userRepository = userRepository;
     }
 
-    // VIEW ALL TODOS
-    @GetMapping("/")
-    public String viewToDos(Model model) {
-        model.addAttribute("allToDoItems", toDoItemService.listAllToDoItems());
-        return "mytodos";
-    }
+//    // VIEW ALL TODOS
+//    @GetMapping("/")
+//    public String viewToDos(Model model) {
+//        model.addAttribute("allToDoItems", userRepository.listAllToDoItems());
+//        return "mytodos";
+//    }
 
     // CREATE NEW TODOITEM FROM SENT JSON
     @PostMapping("/todos/new")
-    public String newToDo(HttpRequest request) {
-        String title = ""; // extract title
-        Calendar dueDate = null; // extract dueDate
-
+    public String newToDo(@RequestBody ToDoItem toDoItem) {
         // getting logged in user
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User userFromDb = userRepository.findOne(currentUser.getId());
 
+        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() != null) {
+            User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if(currentUser != null) {
+                User userFromDb = userRepository.findOne(currentUser.getId());
+                toDoItemService.addToDo(toDoItem, userFromDb);
+                return "ToDoItem added";
+            }else {
+                return "No logged in user found";
+            }
+        } else  {
+            return "There is no user logged in";
+        }
 
-        ToDoItem newToDoItem = new ToDoItem(userFromDb, title, dueDate);
+//        return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
 
-    // this function captures completed form and creates new ToDoItem + adds it to DB
-    @PostMapping(value = "todoitem")
-    public String saveToDo(ToDoItem toDoItem) {
-        toDoItemService.updateItems(toDoItem);
-        return "redirect:/todos";
-    }
+//    // this function captures completed form and creates new ToDoItem + adds it to DB
+//    @PostMapping(value = "todoitem")
+//    public String saveToDo(ToDoItem toDoItem) {
+//        toDoItemService.updateItems(toDoItem);
+//        return "redirect:/todos";
+//    }
 
     @DeleteMapping(value = "/todo/delete/{id}")
     public String deleteToDo(

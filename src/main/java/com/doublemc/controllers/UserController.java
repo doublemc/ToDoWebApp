@@ -27,15 +27,17 @@ public class UserController {
 
     // CREATE A USER
     @PostMapping("/register")
-    public ResponseEntity<Void> createUser(
+    public String createUser(
             @RequestBody User user
     ) {
         if (userService.userExists(user)) {
-            return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+//            return new ResponseEntity<Void>(HttpStatus.CONFLICT);
+            return "User already exists";
         }
 
         userService.saveUser(user);
-        return new ResponseEntity<Void>(HttpStatus.CREATED);
+        return "Good job!";
+//        return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
 
     // TODO: 31.01.17 Create it when Spring Security is ready

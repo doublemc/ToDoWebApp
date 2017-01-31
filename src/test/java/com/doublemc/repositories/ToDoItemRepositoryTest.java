@@ -35,8 +35,8 @@ public class ToDoItemRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        toDoItem1 = new ToDoItem("First", LocalDate.of(2015, 6, 25));
-        toDoItem2 = new ToDoItem("Two", LocalDate.of(2017, 11, 27));
+//        toDoItem1 = new ToDoItem("First", LocalDate.of(2015, 6, 25));
+//        toDoItem2 = new ToDoItem("Two", LocalDate.of(2017, 11, 27));
     }
 
     @Test

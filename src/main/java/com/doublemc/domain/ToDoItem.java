@@ -22,8 +22,7 @@ public class ToDoItem extends BaseEntity {
     private boolean completed;
 
     @Column(name = "DUE_DATE", nullable = false)
-    @Temporal(TemporalType.DATE)
-    protected Calendar dueDate;
+    protected LocalDate dueDate;
 
     // a ToDoItem is only associated with one user
     @ManyToOne(cascade=CascadeType.PERSIST)
@@ -34,7 +33,7 @@ public class ToDoItem extends BaseEntity {
     // JPA demands empty constructor
     public ToDoItem() {}
 
-    public ToDoItem(User user, String title, Calendar dueDate) {
+    public ToDoItem(User user, String title, LocalDate dueDate) {
         this.user = user;
         this.title = title;
         this.dueDate = dueDate;
@@ -57,11 +56,11 @@ public class ToDoItem extends BaseEntity {
         this.completed = completed;
     }
 
-    public Calendar getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Calendar dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 

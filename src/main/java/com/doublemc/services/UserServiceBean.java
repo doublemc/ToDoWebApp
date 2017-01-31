@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 /**
  * Created by michal on 29.01.17.
  */
@@ -21,6 +23,7 @@ public class UserServiceBean {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public User saveUser(User user) {
         return userRepository.save(user);
     }
@@ -31,6 +34,18 @@ public class UserServiceBean {
         }
         return true;
     }
+
+    public Iterable<ToDoItem> findAllToDoItems(User user) {
+        if (userRepository.findOne(user.getId()) == null) {
+            throw new IllegalArgumentException("There is no logged in user");
+        }
+        return user.getToDoItems();
+
+    }
+
+
+
+
 
 
 }

@@ -9,6 +9,9 @@ import org.springframework.http.HttpRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Calendar;
+
 /**
  * Created by michal on 29.01.17.
  */
@@ -25,12 +28,6 @@ public class ToDoItemServiceBean {
         this.userRepository = userRepository;
     }
 
-    public Iterable<ToDoItem> listAllToDoItems(User user) {
-        User foundUser = userRepository.findOne(user.getId());
-        return foundUser.getToDoItems();
-    }
-
-
     public ToDoItem getToDoItemById(Long id) {
         return toDoItemRepository.findOne(id);
     }
@@ -40,9 +37,11 @@ public class ToDoItemServiceBean {
         toDoItemRepository.delete(id);
     }
 
-    public void addToDo(HttpRequest httpRequest, User user) {
-        String toDoTitle = httpRequest
-        ToDoItem newToDo = new ToDoItem(user, )
-        // need to finish
+    public void addToDo(ToDoItem toDoItem, User user) {
+        // TODO: 31.01.17 Validation using Bean Validation API
+        String toDoTitle = toDoItem.getTitle();
+        LocalDate toDoDueDate = toDoItem.getDueDate();
+        ToDoItem newToDo = new ToDoItem(user, toDoTitle, toDoDueDate);
+        toDoItemRepository.save(newToDo);
     }
 }
