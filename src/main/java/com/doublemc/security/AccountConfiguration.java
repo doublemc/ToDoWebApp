@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.GlobalAuthenticationConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 /**
  * Created by michal on 31.01.17.
@@ -13,10 +14,11 @@ import org.springframework.security.config.annotation.authentication.configurers
 @Configuration
 public class AccountConfiguration extends GlobalAuthenticationConfigurerAdapter {
 
-    private UserAuthService userAuthService;
+
+    private UserDetailsService userAuthService;
 
     @Autowired
-    public AccountConfiguration(UserAuthService userAuthService) {
+    public AccountConfiguration(UserDetailsService userAuthService) {
         this.userAuthService = userAuthService;
     }
 
