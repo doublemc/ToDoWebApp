@@ -3,6 +3,7 @@ package com.doublemc.services;
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.UserRepository;
+import com.doublemc.security.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,17 +13,18 @@ import javax.transaction.Transactional;
  * Created by michal on 29.01.17.
  */
 @Service
+@Transactional
 public class UserServiceBean {
 
 
     private UserRepository userRepository;
+    UserAuthService userAuthService;
 
     @Autowired
     public UserServiceBean(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    @Transactional
     public User saveUser(User user) {
         return userRepository.save(user);
     }
@@ -48,10 +50,6 @@ public class UserServiceBean {
         }
 
         userRepository.delete(user.getId());
-    }
-
-    public User findUserInDb(User user) {
-        return userRepository.findOne(user.getId());
     }
 
     public User findUserbyUsername(String username) {

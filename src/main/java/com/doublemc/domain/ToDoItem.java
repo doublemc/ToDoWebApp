@@ -1,15 +1,16 @@
 package com.doublemc.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Created by michal on 28.01.17.
  */
-
 @Entity
 @Table (name = "TO_DO_ITEMS")
 public class ToDoItem extends BaseEntity {
@@ -21,7 +22,10 @@ public class ToDoItem extends BaseEntity {
     private boolean completed;
 
     @Column(name = "DUE_DATE", nullable = false)
-    protected LocalDate dueDate;
+    @Convert(converter = LocalDateAttributeConverter.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    private LocalDate dueDate;
 
     // a ToDoItem is only associated with one user
     @ManyToOne(cascade=CascadeType.PERSIST)
@@ -72,4 +76,13 @@ public class ToDoItem extends BaseEntity {
         this.user = user;
     }
 
+    @Override
+    public String toString() {
+        return "ToDoItem{" +
+                "title='" + title + '\'' +
+                ", completed=" + completed +
+                ", dueDate=" + dueDate +
+                ", user=" + user +
+                '}';
+    }
 }

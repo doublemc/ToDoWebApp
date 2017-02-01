@@ -3,29 +3,25 @@ package com.doublemc.services;
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.ToDoItemRepository;
-import com.doublemc.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.Calendar;
 
 /**
  * Created by michal on 29.01.17.
  */
 @Service
+@Transactional
 public class ToDoItemServiceBean {
 
 
     private ToDoItemRepository toDoItemRepository;
-    private UserRepository userRepository;
 
     @Autowired
-    public ToDoItemServiceBean(ToDoItemRepository toDoItemRepository, UserRepository userRepository) {
+    public ToDoItemServiceBean(ToDoItemRepository toDoItemRepository) {
         this.toDoItemRepository = toDoItemRepository;
-        this.userRepository = userRepository;
     }
 
     public ToDoItem getToDoItemById(Long id) {
@@ -37,11 +33,27 @@ public class ToDoItemServiceBean {
         toDoItemRepository.delete(id);
     }
 
-    public void addToDo(ToDoItem toDoItem, User user) {
-        // TODO: 31.01.17 Validation using Bean Validation API
+
+    public ToDoItem addToDo(ToDoItem toDoItem, User user) {
         String toDoTitle = toDoItem.getTitle();
         LocalDate toDoDueDate = toDoItem.getDueDate();
         ToDoItem newToDo = new ToDoItem(user, toDoTitle, toDoDueDate);
-        toDoItemRepository.save(newToDo);
+        return toDoItemRepository.save(newToDo);
+    }
+
+    public ToDoItem editToDo(ToDoItem newToDoItem, ToDoItem oldToDoItem) {
+        String newTitle = newToDoItem.getTitle();
+        LocalDate newDueDate = newToDoItem.getDueDate();
+        ToDoItem modifiedToDo = toDoItemRepository.findOne(oldToDoItem.getId());
+        modifiedToDo.setTitle(newTitle);
+        modifiedToDo.setDueDate(newDueDate);
+        return modifiedToDo;
+    }
+
+    public boolean toDoExists(Long id) {
+        if (toDoItemRepository.findOne(id) != null) {
+            return true;
+        }
+        return false;
     }
 }

@@ -2,18 +2,15 @@ package com.doublemc.controllers;
 
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
-import com.doublemc.repositories.UserRepository;
 import com.doublemc.services.ToDoItemServiceBean;
+import com.doublemc.services.UserServiceBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Calendar;
+import java.security.Principal;
 
 /**
  * Created by michal on 29.01.17.
@@ -23,67 +20,75 @@ public class ToDoItemController {
 
 
     private ToDoItemServiceBean toDoItemService;
-    private UserRepository userRepository;
-
+    private UserServiceBean userServiceBean;
     @Autowired
-    public ToDoItemController(ToDoItemServiceBean toDoItemService, UserRepository userRepository) {
+    public ToDoItemController(ToDoItemServiceBean toDoItemService, UserServiceBean userServiceBean) {
         this.toDoItemService = toDoItemService;
-        this.userRepository = userRepository;
+        this.userServiceBean = userServiceBean;
     }
 
-//    // VIEW ALL TODOS
-//    @GetMapping("/")
-//    public String viewToDos(Model model) {
-//        model.addAttribute("allToDoItems", userRepository.listAllToDoItems());
-//        return "mytodos";
-//    }
+    @GetMapping("/todos")
+    public ResponseEntity<String> viewToDos(Principal principal) {
+        String currentUsername = principal.getName();
+        User userFromDb = userServiceBean.findUserbyUsername(currentUsername);
+        if (userServiceBean.getAllToDoItems(userFromDb).iterator().hasNext()) {
+            return ResponseEntity.ok(userServiceBean.getAllToDoItems(userFromDb).toString());
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No todos found");
+        }
+    }
+
 
     // CREATE NEW TODOITEM FROM SENT JSON
     @PostMapping("/todos/new")
-    public String newToDo(@RequestBody ToDoItem toDoItem) {
-        // getting logged in user
+    public ResponseEntity<String> newToDo(
+            @RequestBody ToDoItem toDoItem,
+            Principal principal
+    ) {
+        User currentUser = userServiceBean.findUserbyUsername(principal.getName());
+        return ResponseEntity.ok(toDoItemService.addToDo(toDoItem, currentUser).toString());
+    }
 
-        if (SecurityContextHolder.getContext().getAuthentication().getPrincipal() != null) {
-            User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            if(currentUser != null) {
-                User userFromDb = userRepository.findOne(currentUser.getId());
-                toDoItemService.addToDo(toDoItem, userFromDb);
-                return "ToDoItem added";
-            }else {
-                return "No logged in user found";
+
+    // TODO: 02.02.17 Use: https://spring.io/blog/2014/12/02/latest-jackson-integration-improvements-in-spring
+
+    @DeleteMapping("/todos/{id}")
+    public ResponseEntity<String> deleteToDo(
+            @PathVariable("id") Long itemId,
+            Principal principal
+    ) {
+        User currentUser = userServiceBean.findUserbyUsername(principal.getName());
+        if (toDoItemService.getToDoItemById(itemId) != null) {
+            ToDoItem toDoFromDb = toDoItemService.getToDoItemById(itemId);
+            if (toDoFromDb.getUser() == currentUser) {
+                    toDoItemService.deleteToDo(itemId);
+                return ResponseEntity.ok("ToDo deleted successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You don't have access to that todo.");
             }
-        } else  {
-            return "There is no user logged in";
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("ToDo with that id doesn't exist.");
         }
-
-//        return new ResponseEntity<Void>(HttpStatus.CREATED);
     }
 
-//    // this function captures completed form and creates new ToDoItem + adds it to DB
-//    @PostMapping(value = "todoitem")
-//    public String saveToDo(ToDoItem toDoItem) {
-//        toDoItemService.updateItems(toDoItem);
-//        return "redirect:/todos";
-//    }
-
-    @DeleteMapping(value = "/todo/delete/{id}")
-    public String deleteToDo(
-            @PathVariable("id") Long itemId
+    @PutMapping("/todos/{id}")
+    public ResponseEntity<?> editToDo(
+            @PathVariable("id") Long itemId,
+            @RequestBody ToDoItem newToDoItem,
+            Principal principal
     ) {
-//        if (toDoItemService.getToDoItemById(itemId) != null) {
-        toDoItemService.deleteToDo(itemId);
-        return "redirect:/todos";
-//        }
-//        return "failed";
-    }
-
-    @RequestMapping("/todo/edit/{id}")
-    public String editToDo(
-            @PathVariable Long id,
-            Model model
-    ) {
-        model.addAttribute("todoitem", toDoItemService.getToDoItemById(id));
-        return "todoform";
+        User currentUser = userServiceBean.findUserbyUsername(principal.getName());
+        if (toDoItemService.toDoExists(itemId)) {
+            ToDoItem toDoFromDb = toDoItemService.getToDoItemById(itemId);
+            if (toDoFromDb.getUser() == currentUser) {
+                toDoItemService.editToDo(newToDoItem, toDoFromDb);
+                return ResponseEntity.ok("ToDo updated successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You don't have access to that ToDo.");
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ToDo with that id doesn't exist.");
+        }
     }
 
 }
