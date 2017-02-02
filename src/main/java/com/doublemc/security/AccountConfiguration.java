@@ -13,8 +13,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 // Spring Security uses accounts from our database
 @Configuration
 public class AccountConfiguration extends GlobalAuthenticationConfigurerAdapter {
-
-
     private UserDetailsService userAuthService;
 
     @Autowired
@@ -26,6 +24,4 @@ public class AccountConfiguration extends GlobalAuthenticationConfigurerAdapter 
     public void init(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userAuthService);
     }
-
-
 }

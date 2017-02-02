@@ -2,10 +2,15 @@ package com.doublemc.controllers;
 
 import com.doublemc.domain.User;
 import com.doublemc.services.UserServiceBean;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 
@@ -15,40 +20,34 @@ import java.security.Principal;
 
 @RestController
 public class UserController {
-
-    private UserServiceBean userService;
+    private final UserServiceBean userService;
+    private final ObjectMapper mapper;
 
     @Autowired
-    public UserController(UserServiceBean userService) {
+    public UserController(UserServiceBean userService, ObjectMapper objectMapper) {
         this.userService = userService;
+        this.mapper = objectMapper;
     }
 
     // CREATE A USER
-    @PostMapping("/register")
-    public ResponseEntity<?> createUser(
-            @RequestBody User user
-    ) {
+    @PostMapping("/users")
+    public ResponseEntity<ObjectNode> createUser(@RequestBody User user) {
+        ObjectNode jsonObject = mapper.createObjectNode();
         if (userService.userExists(user)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User with that username already exists.");
+            jsonObject.put("status", "User with that username already exists.");
+            return new ResponseEntity<>(jsonObject, HttpStatus.BAD_REQUEST);
         }
-
-        // TODO: 02.02.17 http://stackoverflow.com/questions/671118/what-exactly-is-restful-programming
-        return ResponseEntity.ok(userService.saveUser(user));
+        userService.saveUser(user);
+        jsonObject.put("status", "User created.");
+        return new ResponseEntity<>(jsonObject, HttpStatus.CREATED);
     }
-
-
 
     // DELETE YOUR ACCOUNT - deletes logged in user
-    // doesn't work for now
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(Principal principal){
-        String currentUsername = principal.getName();
-        User userFromDb = userService.findUserbyUsername(currentUsername);
-        userService.deleteUser(userFromDb);
-
-        return ResponseEntity.ok(userFromDb.toString() + " deleted.");
+    @DeleteMapping("/users")
+    public ResponseEntity deleteUser(Principal principal) {
+        if (userService.deleteUser(principal)) {
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity(HttpStatus.BAD_REQUEST);
     }
-
-
-
 }

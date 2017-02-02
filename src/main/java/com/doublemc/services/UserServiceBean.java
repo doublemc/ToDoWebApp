@@ -3,11 +3,11 @@ package com.doublemc.services;
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.UserRepository;
-import com.doublemc.security.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.security.Principal;
 
 /**
  * Created by michal on 29.01.17.
@@ -15,10 +15,7 @@ import javax.transaction.Transactional;
 @Service
 @Transactional
 public class UserServiceBean {
-
-
-    private UserRepository userRepository;
-    UserAuthService userAuthService;
+    private final UserRepository userRepository;
 
     @Autowired
     public UserServiceBean(UserRepository userRepository) {
@@ -37,27 +34,22 @@ public class UserServiceBean {
     }
 
     public Iterable<ToDoItem> getAllToDoItems(User user) {
-        if (!userExists(user)) {
-            throw new IllegalArgumentException("There is no such user in db");
-        }
         return user.getToDoItems();
-
     }
 
-    public void deleteUser(User user) {
-        if (!userExists(user)) {
-            throw new IllegalArgumentException("There is no such user in db");
+    public boolean deleteUser(Principal principal) {
+        if (findLoggedInUser(principal) != null) {
+            userRepository.delete(findLoggedInUser(principal));
+            return true;
         }
-
-        userRepository.delete(user.getId());
+        return false;
     }
 
-    public User findUserbyUsername(String username) {
+    private User findUserbyUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-
-
-
-
+    public User findLoggedInUser(Principal principal) {
+        return findUserbyUsername(principal.getName());
+    }
 }

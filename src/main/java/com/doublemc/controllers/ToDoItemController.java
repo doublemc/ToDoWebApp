@@ -4,10 +4,11 @@ import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.services.ToDoItemServiceBean;
 import com.doublemc.services.UserServiceBean;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -15,80 +16,106 @@ import java.security.Principal;
 /**
  * Created by michal on 29.01.17.
  */
-@Controller
+@RestController
 public class ToDoItemController {
+    private final ToDoItemServiceBean toDoItemService;
+    private final UserServiceBean userService;
+    private final ObjectMapper mapper;
 
-
-    private ToDoItemServiceBean toDoItemService;
-    private UserServiceBean userServiceBean;
     @Autowired
-    public ToDoItemController(ToDoItemServiceBean toDoItemService, UserServiceBean userServiceBean) {
+    public ToDoItemController(ToDoItemServiceBean toDoItemService, UserServiceBean userService, ObjectMapper mapper) {
         this.toDoItemService = toDoItemService;
-        this.userServiceBean = userServiceBean;
+        this.userService = userService;
+        this.mapper = mapper;
     }
 
     @GetMapping("/todos")
-    public ResponseEntity<String> viewToDos(Principal principal) {
-        String currentUsername = principal.getName();
-        User userFromDb = userServiceBean.findUserbyUsername(currentUsername);
-        if (userServiceBean.getAllToDoItems(userFromDb).iterator().hasNext()) {
-            return ResponseEntity.ok(userServiceBean.getAllToDoItems(userFromDb).toString());
+    public ResponseEntity viewToDos(Principal principal) {
+        ObjectNode jsonObject = mapper.createObjectNode();
+        User currentUser = userService.findLoggedInUser(principal);
+        if (userService.getAllToDoItems(currentUser) != null) {
+            return new ResponseEntity<>(userService.getAllToDoItems(currentUser), HttpStatus.OK);
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No todos found");
+            jsonObject.put("status", "You haven't added any ToDos yet");
+            return new ResponseEntity<>(jsonObject, HttpStatus.NO_CONTENT);
         }
     }
 
-
     // CREATE NEW TODOITEM FROM SENT JSON
-    @PostMapping("/todos/new")
-    public ResponseEntity<String> newToDo(
+    @PostMapping("/todos")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ToDoItem newToDo(
             @RequestBody ToDoItem toDoItem,
             Principal principal
     ) {
-        User currentUser = userServiceBean.findUserbyUsername(principal.getName());
-        return ResponseEntity.ok(toDoItemService.addToDo(toDoItem, currentUser).toString());
+        User currentUser = userService.findLoggedInUser(principal);
+        return toDoItemService.addToDo(toDoItem, currentUser);
     }
 
-
-    // TODO: 02.02.17 Use: https://spring.io/blog/2014/12/02/latest-jackson-integration-improvements-in-spring
-
     @DeleteMapping("/todos/{id}")
-    public ResponseEntity<String> deleteToDo(
+    public ResponseEntity deleteToDo(
             @PathVariable("id") Long itemId,
             Principal principal
     ) {
-        User currentUser = userServiceBean.findUserbyUsername(principal.getName());
-        if (toDoItemService.getToDoItemById(itemId) != null) {
-            ToDoItem toDoFromDb = toDoItemService.getToDoItemById(itemId);
-            if (toDoFromDb.getUser() == currentUser) {
-                    toDoItemService.deleteToDo(itemId);
-                return ResponseEntity.ok("ToDo deleted successfully");
+        ObjectNode jsonObject = mapper.createObjectNode();
+        User currentUser = userService.findLoggedInUser(principal);
+        if (toDoItemService.toDoExists(itemId)) {
+            ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
+            if (toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) {
+                toDoItemService.deleteToDo(itemId);
+                return new ResponseEntity(HttpStatus.NO_CONTENT);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You don't have access to that todo.");
+                jsonObject.put("status", "You can only delete your ToDos");
+                return new ResponseEntity<>(jsonObject, HttpStatus.FORBIDDEN);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("ToDo with that id doesn't exist.");
+            jsonObject.put("status", "ToDo with that ID doesn't exist.");
+            return new ResponseEntity<>(jsonObject, HttpStatus.NOT_FOUND);
         }
     }
 
     @PutMapping("/todos/{id}")
-    public ResponseEntity<?> editToDo(
+    public ResponseEntity editToDo(
             @PathVariable("id") Long itemId,
             @RequestBody ToDoItem newToDoItem,
             Principal principal
     ) {
-        User currentUser = userServiceBean.findUserbyUsername(principal.getName());
+        ObjectNode jsonObject = mapper.createObjectNode();
+        User currentUser = userService.findLoggedInUser(principal);
         if (toDoItemService.toDoExists(itemId)) {
-            ToDoItem toDoFromDb = toDoItemService.getToDoItemById(itemId);
-            if (toDoFromDb.getUser() == currentUser) {
+            ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
+            if (toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) {
                 toDoItemService.editToDo(newToDoItem, toDoFromDb);
-                return ResponseEntity.ok("ToDo updated successfully");
+                return new ResponseEntity<>(newToDoItem, HttpStatus.OK);
             } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You don't have access to that ToDo.");
+                jsonObject.put("status", "You can only edit your ToDos");
+                return new ResponseEntity<>(jsonObject, HttpStatus.FORBIDDEN);
             }
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("ToDo with that id doesn't exist.");
+            jsonObject.put("status", "ToDo with that ID doesn't exist.");
+            return new ResponseEntity<>(jsonObject, HttpStatus.NOT_FOUND);
         }
     }
 
+    @PatchMapping("/todos/{id}/complete")
+    public ResponseEntity editToDo(
+            @PathVariable("id") Long itemId,
+            Principal principal
+    ) {
+        ObjectNode jsonObject = mapper.createObjectNode();
+        User currentUser = userService.findLoggedInUser(principal);
+        if (toDoItemService.toDoExists(itemId)) {
+            ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
+            if (toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) {
+                toDoItemService.completeToDo(toDoFromDb);
+                return new ResponseEntity<>(toDoFromDb, HttpStatus.OK);
+            } else {
+                jsonObject.put("status", "You can only complete your ToDos");
+                return new ResponseEntity<>(jsonObject, HttpStatus.FORBIDDEN);
+            }
+        } else {
+            jsonObject.put("status", "ToDo with that ID doesn't exist.");
+            return new ResponseEntity<>(jsonObject, HttpStatus.NOT_FOUND);
+        }
+    }
 }

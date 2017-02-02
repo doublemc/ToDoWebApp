@@ -10,13 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
-
-import java.time.LocalDate;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 
 /**
@@ -28,7 +24,7 @@ import static org.junit.Assert.assertNull;
 public class ToDoItemRepositoryTest {
 
     @Autowired
-    ToDoItemRepository repository;
+    private ToDoItemRepository repository;
 
     private ToDoItem toDoItem1;
     private ToDoItem toDoItem2;

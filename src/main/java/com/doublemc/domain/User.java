@@ -1,6 +1,9 @@
 package com.doublemc.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -8,7 +11,7 @@ import java.util.Set;
  */
 
 @Entity
-@Table (name = "USERS")
+@Table(name = "USERS")
 public class User extends BaseEntity {
 
     @Column(name = "USERNAME")
@@ -22,11 +25,13 @@ public class User extends BaseEntity {
     private String email;
 
     // user can have many ToDoItems
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "user")
-    private Set<ToDoItem> toDoItems;
+    private Set<ToDoItem> toDoItems = new HashSet<>();
 
     // JPA demands empty constructor
-    public User() {}
+    public User() {
+    }
 
     public User(String username, String password, String email) {
         this.username = username;
@@ -66,8 +71,4 @@ public class User extends BaseEntity {
         this.email = email;
     }
 
-    @Override
-    public String toString() {
-        return getId() + ": " + username;
-    }
 }

@@ -15,24 +15,12 @@ import java.time.LocalDate;
 @Service
 @Transactional
 public class ToDoItemServiceBean {
-
-
-    private ToDoItemRepository toDoItemRepository;
+    private final ToDoItemRepository toDoItemRepository;
 
     @Autowired
     public ToDoItemServiceBean(ToDoItemRepository toDoItemRepository) {
         this.toDoItemRepository = toDoItemRepository;
     }
-
-    public ToDoItem getToDoItemById(Long id) {
-        return toDoItemRepository.findOne(id);
-    }
-
-
-    public void deleteToDo(Long id) {
-        toDoItemRepository.delete(id);
-    }
-
 
     public ToDoItem addToDo(ToDoItem toDoItem, User user) {
         String toDoTitle = toDoItem.getTitle();
@@ -44,10 +32,17 @@ public class ToDoItemServiceBean {
     public ToDoItem editToDo(ToDoItem newToDoItem, ToDoItem oldToDoItem) {
         String newTitle = newToDoItem.getTitle();
         LocalDate newDueDate = newToDoItem.getDueDate();
-        ToDoItem modifiedToDo = toDoItemRepository.findOne(oldToDoItem.getId());
-        modifiedToDo.setTitle(newTitle);
-        modifiedToDo.setDueDate(newDueDate);
-        return modifiedToDo;
+        oldToDoItem.setTitle(newTitle);
+        oldToDoItem.setDueDate(newDueDate);
+        return oldToDoItem;
+    }
+
+    public void deleteToDo(Long id) {
+        toDoItemRepository.delete(id);
+    }
+
+    public void completeToDo(ToDoItem toDoItem) {
+        toDoItem.setCompleted(true);
     }
 
     public boolean toDoExists(Long id) {
@@ -55,5 +50,16 @@ public class ToDoItemServiceBean {
             return true;
         }
         return false;
+    }
+
+    public boolean canUserAccessToDo(ToDoItem toDoItem, User user) {
+        if (toDoItem.getUser() == user) {
+            return true;
+        }
+        return false;
+    }
+
+    public ToDoItem findToDoItemById(Long id) {
+        return toDoItemRepository.findOne(id);
     }
 }

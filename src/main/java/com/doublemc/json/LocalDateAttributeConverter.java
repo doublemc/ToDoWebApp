@@ -1,4 +1,4 @@
-package com.doublemc.domain;
+package com.doublemc.json;
 
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
