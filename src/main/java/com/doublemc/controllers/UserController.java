@@ -24,7 +24,7 @@ public class UserController {
     private final ObjectMapper mapper;
 
     @Autowired
-    public UserController(UserServiceBean userService, ObjectMapper objectMapper) {
+    UserController(UserServiceBean userService, ObjectMapper objectMapper) {
         this.userService = userService;
         this.mapper = objectMapper;
     }

@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.LocalDate;
 
 /**
  * Created by michal on 29.01.17.
@@ -18,22 +17,18 @@ public class ToDoItemServiceBean {
     private final ToDoItemRepository toDoItemRepository;
 
     @Autowired
-    public ToDoItemServiceBean(ToDoItemRepository toDoItemRepository) {
+    ToDoItemServiceBean(ToDoItemRepository toDoItemRepository) {
         this.toDoItemRepository = toDoItemRepository;
     }
 
     public ToDoItem addToDo(ToDoItem toDoItem, User user) {
-        String toDoTitle = toDoItem.getTitle();
-        LocalDate toDoDueDate = toDoItem.getDueDate();
-        ToDoItem newToDo = new ToDoItem(user, toDoTitle, toDoDueDate);
+        ToDoItem newToDo = new ToDoItem(user, toDoItem.getTitle(), toDoItem.getDueDate());
         return toDoItemRepository.save(newToDo);
     }
 
     public ToDoItem editToDo(ToDoItem newToDoItem, ToDoItem oldToDoItem) {
-        String newTitle = newToDoItem.getTitle();
-        LocalDate newDueDate = newToDoItem.getDueDate();
-        oldToDoItem.setTitle(newTitle);
-        oldToDoItem.setDueDate(newDueDate);
+        oldToDoItem.setTitle(newToDoItem.getTitle());
+        oldToDoItem.setDueDate(newToDoItem.getDueDate());
         return oldToDoItem;
     }
 
@@ -46,10 +41,7 @@ public class ToDoItemServiceBean {
     }
 
     public boolean toDoExists(Long id) {
-        if (toDoItemRepository.findOne(id) != null) {
-            return true;
-        }
-        return false;
+        return toDoItemRepository.findOne(id) != null;
     }
 
     public boolean canUserAccessToDo(ToDoItem toDoItem, User user) {

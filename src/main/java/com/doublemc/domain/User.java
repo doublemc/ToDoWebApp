@@ -17,7 +17,6 @@ public class User extends BaseEntity {
     @Column(name = "USERNAME")
     private String username;
 
-    // TODO: 28.01.17 Find a way to store hashed and salted pws in DB
     @Column(name = "PASSWORD")
     private String password;
 

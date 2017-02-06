@@ -4,6 +4,7 @@ import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -15,15 +16,22 @@ import java.security.Principal;
 @Service
 @Transactional
 public class UserServiceBean {
+
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceBean(UserRepository userRepository) {
+    UserServiceBean(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User saveUser(User user) {
-        return userRepository.save(user);
+        User newUser = new User();
+        newUser.setUsername(user.getUsername());
+        newUser.setEmail(user.getEmail());
+        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(newUser);
     }
 
     public boolean userExists(User user) {
@@ -45,11 +53,12 @@ public class UserServiceBean {
         return false;
     }
 
+    public User findLoggedInUser(Principal principal) {
+        return findUserbyUsername(principal.getName());
+    }
+
     private User findUserbyUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
-    public User findLoggedInUser(Principal principal) {
-        return findUserbyUsername(principal.getName());
-    }
 }
