@@ -4,7 +4,9 @@ import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.ToDoItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.transaction.Transactional;
 
@@ -54,4 +56,7 @@ public class ToDoItemServiceBean {
     public ToDoItem findToDoItemById(Long id) {
         return toDoItemRepository.findOne(id);
     }
+
+
 }
+

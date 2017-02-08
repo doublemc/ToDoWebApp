@@ -1,11 +1,11 @@
 package com.doublemc.controllers;
 
+import com.doublemc.customexceptions.ToDoItemNotFoundException;
+import com.doublemc.customexceptions.UserAccessException;
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.services.ToDoItemServiceBean;
 import com.doublemc.services.UserServiceBean;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,26 +28,19 @@ import java.security.Principal;
 public class ToDoItemController {
     private final ToDoItemServiceBean toDoItemService;
     private final UserServiceBean userService;
-    private final ObjectMapper mapper;
 
     @Autowired
-    ToDoItemController(ToDoItemServiceBean toDoItemService, UserServiceBean userService, ObjectMapper mapper) {
+    ToDoItemController(ToDoItemServiceBean toDoItemService, UserServiceBean userService) {
         this.toDoItemService = toDoItemService;
         this.userService = userService;
-        this.mapper = mapper;
     }
 
     @GetMapping("/todos")
     public ResponseEntity viewToDos(Principal principal) {
-        ObjectNode jsonObject = mapper.createObjectNode();
         User currentUser = userService.findLoggedInUser(principal);
-        if (userService.getAllToDoItems(currentUser) != null) {
-            return new ResponseEntity<>(userService.getAllToDoItems(currentUser), HttpStatus.OK);
-        } else {
-            jsonObject.put("status", "You haven't added any ToDos yet");
-            return new ResponseEntity<>(jsonObject, HttpStatus.NO_CONTENT);
-        }
+        return new ResponseEntity<>(userService.getAllToDoItems(currentUser), HttpStatus.OK);
     }
+
 
     // CREATE NEW TODOITEM FROM SENT JSON
     @PostMapping("/todos")
@@ -65,21 +58,12 @@ public class ToDoItemController {
             @PathVariable("id") Long itemId,
             Principal principal
     ) {
-        ObjectNode jsonObject = mapper.createObjectNode();
         User currentUser = userService.findLoggedInUser(principal);
-        if (toDoItemService.toDoExists(itemId)) {
-            ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
-            if (toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) {
-                toDoItemService.deleteToDo(itemId);
-                return new ResponseEntity(HttpStatus.NO_CONTENT);
-            } else {
-                jsonObject.put("status", "You can only delete your ToDos");
-                return new ResponseEntity<>(jsonObject, HttpStatus.FORBIDDEN);
-            }
-        } else {
-            jsonObject.put("status", "ToDo with that ID doesn't exist.");
-            return new ResponseEntity<>(jsonObject, HttpStatus.NOT_FOUND);
-        }
+        if (!toDoItemService.toDoExists(itemId)) throw new ToDoItemNotFoundException();
+        ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
+        if (!toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) throw new UserAccessException();
+        toDoItemService.deleteToDo(itemId);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/todos/{id}")
@@ -88,21 +72,12 @@ public class ToDoItemController {
             @RequestBody ToDoItem newToDoItem,
             Principal principal
     ) {
-        ObjectNode jsonObject = mapper.createObjectNode();
         User currentUser = userService.findLoggedInUser(principal);
-        if (toDoItemService.toDoExists(itemId)) {
-            ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
-            if (toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) {
-                toDoItemService.editToDo(newToDoItem, toDoFromDb);
-                return new ResponseEntity<>(newToDoItem, HttpStatus.OK);
-            } else {
-                jsonObject.put("status", "You can only edit your ToDos");
-                return new ResponseEntity<>(jsonObject, HttpStatus.FORBIDDEN);
-            }
-        } else {
-            jsonObject.put("status", "ToDo with that ID doesn't exist.");
-            return new ResponseEntity<>(jsonObject, HttpStatus.NOT_FOUND);
-        }
+        if (!toDoItemService.toDoExists(itemId)) throw new ToDoItemNotFoundException();
+        ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
+        if (!toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) throw new UserAccessException();
+        toDoItemService.editToDo(newToDoItem, toDoFromDb);
+        return new ResponseEntity<>(newToDoItem, HttpStatus.OK);
     }
 
     @PatchMapping("/todos/{id}/complete")
@@ -110,20 +85,11 @@ public class ToDoItemController {
             @PathVariable("id") Long itemId,
             Principal principal
     ) {
-        ObjectNode jsonObject = mapper.createObjectNode();
         User currentUser = userService.findLoggedInUser(principal);
-        if (toDoItemService.toDoExists(itemId)) {
-            ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
-            if (toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) {
-                toDoItemService.completeToDo(toDoFromDb);
-                return new ResponseEntity<>(toDoFromDb, HttpStatus.OK);
-            } else {
-                jsonObject.put("status", "You can only complete your ToDos");
-                return new ResponseEntity<>(jsonObject, HttpStatus.FORBIDDEN);
-            }
-        } else {
-            jsonObject.put("status", "ToDo with that ID doesn't exist.");
-            return new ResponseEntity<>(jsonObject, HttpStatus.NOT_FOUND);
-        }
+        if (!toDoItemService.toDoExists(itemId)) throw new ToDoItemNotFoundException();
+        ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
+        if (!toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) throw new UserAccessException();
+        toDoItemService.completeToDo(toDoFromDb);
+        return new ResponseEntity<>(toDoFromDb, HttpStatus.OK);
     }
 }

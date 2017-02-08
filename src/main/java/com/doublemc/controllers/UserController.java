@@ -1,5 +1,6 @@
 package com.doublemc.controllers;
 
+import com.doublemc.customexceptions.UsernameAlreadyExistsException;
 import com.doublemc.domain.User;
 import com.doublemc.services.UserServiceBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,10 +34,7 @@ public class UserController {
     @PostMapping("/users")
     public ResponseEntity<ObjectNode> createUser(@RequestBody User user) {
         ObjectNode jsonObject = mapper.createObjectNode();
-        if (userService.userExists(user)) {
-            jsonObject.put("status", "User with that username already exists.");
-            return new ResponseEntity<>(jsonObject, HttpStatus.BAD_REQUEST);
-        }
+        if (userService.userExists(user)) throw new UsernameAlreadyExistsException();
         userService.saveUser(user);
         jsonObject.put("status", "User created.");
         return new ResponseEntity<>(jsonObject, HttpStatus.CREATED);
