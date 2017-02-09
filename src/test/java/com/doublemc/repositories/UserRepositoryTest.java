@@ -37,43 +37,63 @@ public class UserRepositoryTest {
 
     @Test
     public void hasIdAfterSavingToDb() {
-        assertNull(user1.getId());
+        // when
         repository.save(user1);
-        assertNotNull(user1.getId());
 
+        // then
+        assertNotNull(user1.getId());
     }
 
     @Test
     public void findUserById () {
+        // when
         repository.save(user1);
+
+        // then
         assertNotNull(repository.findOne(user1.getId()));
     }
 
     @Test
     public void hasTheSameEmailAfterSavingToDb() {
+        // when
         User savedUser =  repository.save(user1);
+
+        // then
         assertEquals(user1.getEmail(), savedUser.getEmail());
     }
 
     @Test
     public void isUpdatingEmailCorrectly() {
+        // given
         User savedUser = repository.save(user1);
         savedUser.setEmail("new@example.com");
+
+        // when
         repository.save(savedUser);
+
+        // then
         User changedUser = repository.findOne(savedUser.getId());
         assertEquals(savedUser.getEmail(), changedUser.getEmail());
     }
 
     @Test
     public void verifyNumberOfUsersInDb() {
+        // when
         repository.save(Arrays.asList(user1, user2));
+
+        // then
         assertEquals(2, repository.count());
     }
 
     @Test
     public void verifyDeletedFileFromDb() {
+        // given
         repository.save(Arrays.asList(user1, user2));
+
+        // when
         repository.delete(user1.getId());
+
+        // then
         assertEquals(1, repository.count());
     }
 
