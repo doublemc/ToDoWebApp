@@ -14,8 +14,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
@@ -42,58 +41,67 @@ public class ToDoItemRepositoryTest {
     }
 
     @Test
-    public void hasIdAfterSavingToDb() {
-        // when
+    public void shouldHaveIdAfterSavingToDb() {
+        // given
         repository.save(toDoItem1);
 
+        // when
+        long idFromDb = toDoItem1.getId();
+
         // then
-        assertNotNull(toDoItem1.getId());
+        assertThat(idFromDb).isGreaterThan(0);
 
     }
 
     @Test
-    public void findToDoItemById () {
-        // when
+    public void shouldFindItemById () {
+        // given
         repository.save(toDoItem1);
 
+        // when
+        ToDoItem toDoItemFromDb = repository.findOne(toDoItem1.getId());
+
         // then
-        assertNotNull(repository.findOne(toDoItem1.getId()));
+        assertThat(toDoItemFromDb).isNotNull();
     }
 
     @Test
-    public void hasTheSameTitleAfterSavingToDb() {
+    public void shouldHaveTheSameTitleAfterSavingToDb() {
         // when
         ToDoItem savedToDo =  repository.save(toDoItem1);
 
         // then
-        assertEquals(toDoItem1.getTitle(), savedToDo.getTitle());
+        assertThat(savedToDo.getTitle()).isEqualTo(toDoItem1.getTitle());
     }
 
     @Test
-    public void isUpdatingTitleCorrectly() {
+    public void shouldUpdateTitleCorrectly() {
         // given
         ToDoItem savedToDo = repository.save(toDoItem1);
         savedToDo.setTitle("New title");
-
-        // when
         repository.save(savedToDo);
 
-        // then
+        // when
         ToDoItem changedToDo = repository.findOne(savedToDo.getId());
-        assertEquals(savedToDo.getTitle(), changedToDo.getTitle());
+
+        // then
+        assertThat(changedToDo.getTitle()).isEqualTo(savedToDo.getTitle());
     }
 
     @Test
-    public void verifyNumberOfToDosInDb() {
-        // when
+    public void shouldVerifyNumberOfToDosInDb() {
+        //given
         repository.save(Arrays.asList(toDoItem1, toDoItem2));
 
+        // when
+        long idCountInRepository = repository.count();
+
         // then
-        assertEquals(2, repository.count());
+        assertThat(idCountInRepository).isEqualTo(2);
     }
 
     @Test
-    public void verifyDeletedFileFromDb() {
+    public void shouldDeleteToDoFromDb() {
         // given
         repository.save(Arrays.asList(toDoItem1, toDoItem2));
 
@@ -101,7 +109,7 @@ public class ToDoItemRepositoryTest {
         repository.delete(toDoItem1.getId());
 
         // then
-        assertEquals(1, repository.count());
+        assertThat(repository.count()).isEqualTo(1);
     }
 
 

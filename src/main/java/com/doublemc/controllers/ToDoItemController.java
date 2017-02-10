@@ -37,8 +37,7 @@ public class ToDoItemController {
 
     @GetMapping("/todos")
     public ResponseEntity viewToDos(Principal principal) {
-        User currentUser = userService.findLoggedInUser(principal);
-        return new ResponseEntity<>(userService.getAllToDoItems(currentUser), HttpStatus.OK);
+        return new ResponseEntity<>(userService.getAllToDoItems(principal), HttpStatus.OK);
     }
 
 

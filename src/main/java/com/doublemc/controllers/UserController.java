@@ -34,7 +34,7 @@ public class UserController {
     @PostMapping("/users")
     public ResponseEntity<ObjectNode> createUser(@RequestBody User user) {
         ObjectNode jsonObject = mapper.createObjectNode();
-        if (userService.userExists(user)) throw new UsernameAlreadyExistsException();
+        if (userService.userWithThatUsernameAlreadyExists(user)) throw new UsernameAlreadyExistsException();
         userService.saveUser(user);
         jsonObject.put("status", "User created.");
         return new ResponseEntity<>(jsonObject, HttpStatus.CREATED);
@@ -43,7 +43,7 @@ public class UserController {
     // DELETE YOUR ACCOUNT - deletes logged in user
     @DeleteMapping("/users")
     public ResponseEntity deleteUser(Principal principal) {
-        if (userService.deleteUser(principal)) {
+        if (userService.deleteCurrentlyLoggedInUser(principal)) {
             return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity(HttpStatus.BAD_REQUEST);

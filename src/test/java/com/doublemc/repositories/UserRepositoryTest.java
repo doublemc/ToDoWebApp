@@ -9,10 +9,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
-
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * Created by michal on 29.01.17.
@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 public class UserRepositoryTest {
 
     @Autowired
-    UserRepository repository;
+    private UserRepository repository;
 
     private User user1;
     private User user2;
@@ -36,57 +36,68 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void hasIdAfterSavingToDb() {
-        // when
+    public void shouldHaveIdAfterSavingToDb() {
+        // given
         repository.save(user1);
 
+        // when
+        long idFromDb = user1.getId();
         // then
-        assertNotNull(user1.getId());
+        assertThat(idFromDb).isGreaterThan(0);
     }
 
     @Test
-    public void findUserById () {
-        // when
+    public void shouldFindUserById () {
+        // given
         repository.save(user1);
 
+        // when
+        User userFromDb = repository.findOne(user1.getId());
+
         // then
-        assertNotNull(repository.findOne(user1.getId()));
+        assertThat(userFromDb).isNotNull();
     }
 
     @Test
-    public void hasTheSameEmailAfterSavingToDb() {
-        // when
+    public void shouldHaveSameEmailAfterSavingToDo() {
+        // given
         User savedUser =  repository.save(user1);
 
+        // when
+        String emailFromDb = savedUser.getEmail();
+
         // then
-        assertEquals(user1.getEmail(), savedUser.getEmail());
+        assertThat(emailFromDb).isEqualTo(user1.getEmail());
     }
 
     @Test
-    public void isUpdatingEmailCorrectly() {
+    public void shouldUpadteEmailCorrectly() {
         // given
         User savedUser = repository.save(user1);
         savedUser.setEmail("new@example.com");
-
-        // when
         repository.save(savedUser);
 
-        // then
+        // when
         User changedUser = repository.findOne(savedUser.getId());
-        assertEquals(savedUser.getEmail(), changedUser.getEmail());
+
+        // then
+        assertThat(changedUser.getEmail()).isEqualTo(savedUser.getEmail());
     }
 
     @Test
-    public void verifyNumberOfUsersInDb() {
-        // when
+    public void shouldVerifyNumberOfUsersInDb() {
+        // given
         repository.save(Arrays.asList(user1, user2));
 
+        // when
+        long idCountInRepository = repository.count();
+
         // then
-        assertEquals(2, repository.count());
+        assertThat(idCountInRepository).isEqualTo(2);
     }
 
     @Test
-    public void verifyDeletedFileFromDb() {
+    public void shouldDeleteUserFromDb() {
         // given
         repository.save(Arrays.asList(user1, user2));
 
@@ -94,7 +105,6 @@ public class UserRepositoryTest {
         repository.delete(user1.getId());
 
         // then
-        assertEquals(1, repository.count());
+        assertThat(repository.findOne(user1.getId())).isNull();
     }
-
 }

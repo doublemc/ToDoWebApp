@@ -27,25 +27,19 @@ public class UserServiceBean {
     }
 
     public User saveUser(User user) {
-        User newUser = new User();
-        newUser.setUsername(user.getUsername());
-        newUser.setEmail(user.getEmail());
-        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        User newUser = new User(user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getEmail());
         return userRepository.save(newUser);
     }
 
-    public boolean userExists(User user) {
-        if (userRepository.findByUsername(user.getUsername()) == null) {
-            return false;
-        }
-        return true;
+    public boolean userWithThatUsernameAlreadyExists(User user) {
+        return userRepository.findByUsername(user.getUsername()) != null;
     }
 
-    public Iterable<ToDoItem> getAllToDoItems(User user) {
-        return user.getToDoItems();
+    public Iterable<ToDoItem> getAllToDoItems(Principal principal) {
+        return findLoggedInUser(principal).getToDoItems();
     }
 
-    public boolean deleteUser(Principal principal) {
+    public boolean deleteCurrentlyLoggedInUser(Principal principal) {
         if (findLoggedInUser(principal) != null) {
             userRepository.delete(findLoggedInUser(principal));
             return true;
@@ -54,11 +48,7 @@ public class UserServiceBean {
     }
 
     public User findLoggedInUser(Principal principal) {
-        return findUserbyUsername(principal.getName());
-    }
-
-    private User findUserbyUsername(String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(principal.getName());
     }
 
 }
