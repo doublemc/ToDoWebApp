@@ -60,6 +60,10 @@ public class ToDoItem extends BaseEntity {
         this.title = title;
     }
 
+    public boolean isCompleted() {
+        return completed;
+    }
+
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }

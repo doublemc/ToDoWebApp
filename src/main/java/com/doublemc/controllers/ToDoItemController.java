@@ -1,9 +1,6 @@
 package com.doublemc.controllers;
 
-import com.doublemc.customexceptions.ToDoItemNotFoundException;
-import com.doublemc.customexceptions.UserAccessException;
 import com.doublemc.domain.ToDoItem;
-import com.doublemc.domain.User;
 import com.doublemc.services.ToDoItemServiceBean;
 import com.doublemc.services.UserServiceBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,16 +37,13 @@ public class ToDoItemController {
         return new ResponseEntity<>(userService.getAllToDoItems(principal), HttpStatus.OK);
     }
 
-
-    // CREATE NEW TODOITEM FROM SENT JSON
     @PostMapping("/todos")
     @ResponseStatus(HttpStatus.CREATED)
     public ToDoItem newToDo(
             @RequestBody ToDoItem toDoItem,
             Principal principal
     ) {
-        User currentUser = userService.findLoggedInUser(principal);
-        return toDoItemService.addToDo(toDoItem, currentUser);
+        return toDoItemService.addToDo(toDoItem, principal);
     }
 
     @DeleteMapping("/todos/{id}")
@@ -57,11 +51,7 @@ public class ToDoItemController {
             @PathVariable("id") Long itemId,
             Principal principal
     ) {
-        User currentUser = userService.findLoggedInUser(principal);
-        if (!toDoItemService.toDoExists(itemId)) throw new ToDoItemNotFoundException();
-        ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
-        if (!toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) throw new UserAccessException();
-        toDoItemService.deleteToDo(itemId);
+        toDoItemService.deleteToDo(itemId, principal);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
@@ -71,11 +61,7 @@ public class ToDoItemController {
             @RequestBody ToDoItem newToDoItem,
             Principal principal
     ) {
-        User currentUser = userService.findLoggedInUser(principal);
-        if (!toDoItemService.toDoExists(itemId)) throw new ToDoItemNotFoundException();
-        ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
-        if (!toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) throw new UserAccessException();
-        toDoItemService.editToDo(newToDoItem, toDoFromDb);
+        toDoItemService.editToDo(newToDoItem, itemId, principal);
         return new ResponseEntity<>(newToDoItem, HttpStatus.OK);
     }
 
@@ -84,11 +70,7 @@ public class ToDoItemController {
             @PathVariable("id") Long itemId,
             Principal principal
     ) {
-        User currentUser = userService.findLoggedInUser(principal);
-        if (!toDoItemService.toDoExists(itemId)) throw new ToDoItemNotFoundException();
-        ToDoItem toDoFromDb = toDoItemService.findToDoItemById(itemId);
-        if (!toDoItemService.canUserAccessToDo(toDoFromDb, currentUser)) throw new UserAccessException();
-        toDoItemService.completeToDo(toDoFromDb);
-        return new ResponseEntity<>(toDoFromDb, HttpStatus.OK);
+        toDoItemService.completeToDo(itemId, principal);
+        return new ResponseEntity<>(itemId, HttpStatus.OK);
     }
 }

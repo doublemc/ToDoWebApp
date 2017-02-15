@@ -1,6 +1,5 @@
 package com.doublemc.controllers;
 
-import com.doublemc.customexceptions.UsernameAlreadyExistsException;
 import com.doublemc.domain.User;
 import com.doublemc.services.UserServiceBean;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +33,6 @@ public class UserController {
     @PostMapping("/users")
     public ResponseEntity<ObjectNode> createUser(@RequestBody User user) {
         ObjectNode jsonObject = mapper.createObjectNode();
-        if (userService.userWithThatUsernameAlreadyExists(user)) throw new UsernameAlreadyExistsException();
         userService.saveUser(user);
         jsonObject.put("status", "User created.");
         return new ResponseEntity<>(jsonObject, HttpStatus.CREATED);
@@ -43,9 +41,7 @@ public class UserController {
     // DELETE YOUR ACCOUNT - deletes logged in user
     @DeleteMapping("/users")
     public ResponseEntity deleteUser(Principal principal) {
-        if (userService.deleteCurrentlyLoggedInUser(principal)) {
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity(HttpStatus.BAD_REQUEST);
+        userService.deleteCurrentlyLoggedInUser(principal);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

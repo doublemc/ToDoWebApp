@@ -15,8 +15,10 @@ public class WebConfiguration extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // allow everyone to register an account; /console is just for testing
+        // allow everyone to register an account
         http.authorizeRequests().antMatchers(HttpMethod.POST, "/users").permitAll();
+
+        //console is just for testing
         http.authorizeRequests().antMatchers("/console/**").permitAll();
         http.authorizeRequests().anyRequest().authenticated();
         // making H2 console working

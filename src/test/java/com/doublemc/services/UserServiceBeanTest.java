@@ -1,9 +1,13 @@
 package com.doublemc.services;
 
+import com.doublemc.customexceptions.UserAlreadyDeletedException;
+import com.doublemc.customexceptions.UsernameAlreadyExistsException;
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.UserRepository;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.security.Principal;
@@ -14,7 +18,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,33 +34,31 @@ public class UserServiceBeanTest {
     private final String DEFAULT_PASSWORD = "password";
     private final String DEFAULT_EMAIL = "example@example.com";
 
+    @Rule
+    public final ExpectedException exception = ExpectedException.none();
 
-    private UserServiceBean userServiceBean = new UserServiceBean(userRepositoryMock, passwordEncoderMock);
+    private UserServiceBean sut = new UserServiceBean(userRepositoryMock, passwordEncoderMock);
 
     @Test
-    public void shouldReturnTrue_whenUserDeleted() {
+    public void shouldCallDeleteOnce() {
         // given
         User userBeingDeleted = new User(DEFAULT_NAME, DEFAULT_PASSWORD, DEFAULT_EMAIL);
         when(userRepositoryMock.findByUsername(principalStub.getName())).thenReturn(userBeingDeleted);
 
         // when
-        boolean removed = userServiceBean.deleteCurrentlyLoggedInUser(principalStub);
+        sut.deleteCurrentlyLoggedInUser(principalStub);
 
         // then
-        assertThat(removed).isTrue();
         verify(userRepositoryMock).delete(userBeingDeleted);    }
 
     @Test
-    public void shouldReturnFalse_whenUserNotFound() {
+    public void shouldThrowException_whenUserAlreadyDeleted() {
         // given
-        when(userServiceBean.findLoggedInUser(principalStub)).thenReturn(null);
+        when(sut.findLoggedInUser(principalStub)).thenReturn(null);
 
         // when
-        boolean removed = userServiceBean.deleteCurrentlyLoggedInUser(principalStub);
-
-        // then
-        assertThat(removed).isFalse();
-        verify(userRepositoryMock, never()).delete(any(User.class));
+        exception.expect(UserAlreadyDeletedException.class);
+        sut.deleteCurrentlyLoggedInUser(principalStub);
     }
 
     @Test
@@ -67,20 +68,31 @@ public class UserServiceBeanTest {
         when(userRepositoryMock.save(any(User.class))).thenReturn(userToBeSaved);
 
         // when
-        User savedUser = userServiceBean.saveUser(userToBeSaved);
+        User savedUser = sut.saveUser(userToBeSaved);
 
         // then
         assertThat(savedUser).isNotNull();
     }
 
     @Test
+    public void shouldThrowException_whenUsernameAlreadyExistsInDb() {
+        // given
+        User userToBeSaved = new User(DEFAULT_NAME, DEFAULT_PASSWORD, DEFAULT_EMAIL);
+        when(userRepositoryMock.findByUsername(userToBeSaved.getUsername())).thenReturn(userToBeSaved);
+
+        // when
+        exception.expect(UsernameAlreadyExistsException.class);
+        sut.saveUser(userToBeSaved);
+    }
+
+    @Test
     public void shouldBeEmpty_whenThereAreNoToDos() {
         // given
         User loggedInUser = new User(DEFAULT_NAME, DEFAULT_PASSWORD, DEFAULT_EMAIL);
-        when(userServiceBean.findLoggedInUser(principalStub)).thenReturn(loggedInUser);
+        when(sut.findLoggedInUser(principalStub)).thenReturn(loggedInUser);
 
         // when
-        Iterable<ToDoItem> toDos = userServiceBean.getAllToDoItems(principalStub);
+        Iterable<ToDoItem> toDos = sut.getAllToDoItems(principalStub);
 
         // then
         assertThat(toDos).isEmpty();
@@ -93,41 +105,14 @@ public class UserServiceBeanTest {
         Set<ToDoItem> toDoItems = new HashSet<>();
         User userStub = mock(User.class);
         toDoItems.add(new ToDoItem(userStub, "newToDo", LocalDate.of(2015, 10, 20)));
-        when(userServiceBean.findLoggedInUser(principalStub)).thenReturn(userStub);
+        when(sut.findLoggedInUser(principalStub)).thenReturn(userStub);
         when(userStub.getToDoItems()).thenReturn(toDoItems);
 
         // when
-        Iterable<ToDoItem> toDos = userServiceBean.getAllToDoItems(principalStub);
+        Iterable<ToDoItem> toDos = sut.getAllToDoItems(principalStub);
 
         // then
         assertThat(toDos).isNotEmpty();
         verify(userRepositoryMock).findByUsername(principalStub.getName());
-    }
-//
-    @Test
-    public void shouldReturnTrue_whenUserExists() {
-        // given
-        User user = new User(DEFAULT_NAME, DEFAULT_PASSWORD, DEFAULT_EMAIL);
-        when(userRepositoryMock.findByUsername(user.getUsername())).thenReturn(user);
-
-        // when
-        boolean exists = userServiceBean.userWithThatUsernameAlreadyExists(user);
-
-        // then
-        assertThat(exists).isTrue();
-        verify(userRepositoryMock).findByUsername(DEFAULT_NAME);
-    }
-
-    @Test
-    public void shouldReturnFalse_whenUserNotFoundByUsername() {
-        // given
-        User user = new User(DEFAULT_NAME, DEFAULT_PASSWORD, DEFAULT_EMAIL);
-        when(userRepositoryMock.findByUsername(user.getUsername())).thenReturn(null);
-
-        // when
-        boolean exists = userServiceBean.userWithThatUsernameAlreadyExists(user);
-
-        // then
-        assertThat(exists).isFalse();
     }
 }

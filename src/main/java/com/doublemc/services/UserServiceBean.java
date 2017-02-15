@@ -1,5 +1,7 @@
 package com.doublemc.services;
 
+import com.doublemc.customexceptions.UserAlreadyDeletedException;
+import com.doublemc.customexceptions.UsernameAlreadyExistsException;
 import com.doublemc.domain.ToDoItem;
 import com.doublemc.domain.User;
 import com.doublemc.repositories.UserRepository;
@@ -27,28 +29,27 @@ public class UserServiceBean {
     }
 
     public User saveUser(User user) {
+        if (userWithThatUsernameAlreadyExists(user)) throw new UsernameAlreadyExistsException();
         User newUser = new User(user.getUsername(), passwordEncoder.encode(user.getPassword()), user.getEmail());
         return userRepository.save(newUser);
     }
 
-    public boolean userWithThatUsernameAlreadyExists(User user) {
+    private boolean userWithThatUsernameAlreadyExists(User user) {
         return userRepository.findByUsername(user.getUsername()) != null;
+    }
+
+    public void deleteCurrentlyLoggedInUser(Principal principal) {
+        if (findLoggedInUser(principal) == null) {
+            throw new UserAlreadyDeletedException();
+        }
+        userRepository.delete(findLoggedInUser(principal));
+    }
+
+    User findLoggedInUser(Principal principal) {
+        return userRepository.findByUsername(principal.getName());
     }
 
     public Iterable<ToDoItem> getAllToDoItems(Principal principal) {
         return findLoggedInUser(principal).getToDoItems();
     }
-
-    public boolean deleteCurrentlyLoggedInUser(Principal principal) {
-        if (findLoggedInUser(principal) != null) {
-            userRepository.delete(findLoggedInUser(principal));
-            return true;
-        }
-        return false;
-    }
-
-    public User findLoggedInUser(Principal principal) {
-        return userRepository.findByUsername(principal.getName());
-    }
-
 }
