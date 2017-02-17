@@ -66,6 +66,12 @@
 			<version>3.6.2</version>
 		</dependency>
 
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
 		<!-- https://mvnrepository.com/artifact/com.googlecode.catch-exception/catch-exception -->
 		<dependency>
 			<groupId>com.googlecode.catch-exception</groupId>

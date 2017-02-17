@@ -26,16 +26,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ToDoItemRepositoryTest {
 
     @Autowired
-    private ToDoItemRepository repository;
+    private ToDoItemRepository sut;
 
     private ToDoItem toDoItem1;
     private ToDoItem toDoItem2;
 
-    private User user;
-
     @Before
     public void setUp() throws Exception {
-        user = new User("user", "password", "example@example.com");
+        User user = new User("user", "password", "example@example.com");
         toDoItem1 = new ToDoItem(user, "First", LocalDate.of(2015, 6, 25));
         toDoItem2 = new ToDoItem(user, "Two", LocalDate.of(2017, 11, 27));
     }
@@ -43,23 +41,22 @@ public class ToDoItemRepositoryTest {
     @Test
     public void shouldHaveIdAfterSavingToDb() {
         // given
-        repository.save(toDoItem1);
+        sut.save(toDoItem1);
 
         // when
         long idFromDb = toDoItem1.getId();
 
         // then
         assertThat(idFromDb).isGreaterThan(0);
-
     }
 
     @Test
     public void shouldFindItemById () {
         // given
-        repository.save(toDoItem1);
+        sut.save(toDoItem1);
 
         // when
-        ToDoItem toDoItemFromDb = repository.findOne(toDoItem1.getId());
+        ToDoItem toDoItemFromDb = sut.findOne(toDoItem1.getId());
 
         // then
         assertThat(toDoItemFromDb).isNotNull();
@@ -68,7 +65,7 @@ public class ToDoItemRepositoryTest {
     @Test
     public void shouldHaveTheSameTitleAfterSavingToDb() {
         // when
-        ToDoItem savedToDo =  repository.save(toDoItem1);
+        ToDoItem savedToDo =  sut.save(toDoItem1);
 
         // then
         assertThat(savedToDo.getTitle()).isEqualTo(toDoItem1.getTitle());
@@ -77,12 +74,12 @@ public class ToDoItemRepositoryTest {
     @Test
     public void shouldUpdateTitleCorrectly() {
         // given
-        ToDoItem savedToDo = repository.save(toDoItem1);
+        ToDoItem savedToDo = sut.save(toDoItem1);
         savedToDo.setTitle("New title");
-        repository.save(savedToDo);
+        sut.save(savedToDo);
 
         // when
-        ToDoItem changedToDo = repository.findOne(savedToDo.getId());
+        ToDoItem changedToDo = sut.findOne(savedToDo.getId());
 
         // then
         assertThat(changedToDo.getTitle()).isEqualTo(savedToDo.getTitle());
@@ -91,10 +88,10 @@ public class ToDoItemRepositoryTest {
     @Test
     public void shouldVerifyNumberOfToDosInDb() {
         //given
-        repository.save(Arrays.asList(toDoItem1, toDoItem2));
+        sut.save(Arrays.asList(toDoItem1, toDoItem2));
 
         // when
-        long idCountInRepository = repository.count();
+        long idCountInRepository = sut.count();
 
         // then
         assertThat(idCountInRepository).isEqualTo(2);
@@ -103,13 +100,13 @@ public class ToDoItemRepositoryTest {
     @Test
     public void shouldDeleteToDoFromDb() {
         // given
-        repository.save(Arrays.asList(toDoItem1, toDoItem2));
+        sut.save(Arrays.asList(toDoItem1, toDoItem2));
 
         // when
-        repository.delete(toDoItem1.getId());
+        sut.delete(toDoItem1.getId());
 
         // then
-        assertThat(repository.count()).isEqualTo(1);
+        assertThat(sut.count()).isEqualTo(1);
     }
 
 

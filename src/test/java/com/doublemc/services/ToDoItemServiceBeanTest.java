@@ -26,8 +26,8 @@ public class ToDoItemServiceBeanTest {
 
     private static final String DEFAULT_TITLE = "title";
     private static final LocalDate DEFAULT_DATE = LocalDate.of(2010, 10, 20);
-    private final String CHANGED_TITLE = "new title";
-    private final LocalDate CHANGED_DATE = LocalDate.of(1999, 10, 20);
+    private static final String CHANGED_TITLE = "new title";
+    private static final LocalDate CHANGED_DATE = LocalDate.of(1999, 10, 20);
 
     private ToDoItemRepository toDoItemRepositoryMock = mock(ToDoItemRepository.class);
     private UserServiceBean userServiceMock = mock(UserServiceBean.class);
